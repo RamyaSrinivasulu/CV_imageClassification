@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <fstream>
 // opencv
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -15,7 +16,7 @@
 
 namespace facebook::react {
 
-class NativeClassifyImageModule : public NativeClassifyImageModuleCxxSpec<NativeInferenceModule> {
+class NativeClassifyImageModule : public NativeClassifyImageModuleCxxSpec<NativeClassifyImageModule> {
 public:
   NativeClassifyImageModule(std::shared_ptr<CallInvoker> jsInvoker);
 

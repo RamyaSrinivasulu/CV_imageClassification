@@ -1,8 +1,8 @@
-#include "NativeInferenceModule.h"
+#include "NativeClassifyImageModule.h"
 
 namespace facebook::react {
 
-NativeInferenceModule::NativeClassifyImageModule(std::shared_ptr<CallInvoker> jsInvoker)
+NativeClassifyImageModule::NativeClassifyImageModule(std::shared_ptr<CallInvoker> jsInvoker)
     : NativeClassifyImageModuleCxxSpec(std::move(jsInvoker)) {}
 
 std::string NativeClassifyImageModule::loadModel(jsi::Runtime& rt, std::string modelPath, std::string labelPath){
@@ -11,7 +11,7 @@ std::string NativeClassifyImageModule::loadModel(jsi::Runtime& rt, std::string m
         Ort::SessionOptions session_options{nullptr};
         auto envLocal = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "Inference");
         env = std::move(envLocal);
-        auto sessionLocal = std::make_unique<Ort::Session>(*env, model_path.c_str(), session_options);
+        auto sessionLocal = std::make_unique<Ort::Session>(*env, modelPath.c_str(), session_options);
         session = std::move(sessionLocal);
     }catch (const std::exception& e) {
         return std::string("false");
@@ -45,15 +45,15 @@ std::string NativeClassifyImageModule::runInference(jsi::Runtime& rt, std::strin
         imagePath = imagePath.substr(prefix.length()); // Remove the prefix
     }
     // Load image
-    cv::Mat img = cv::imread(image_path, cv::IMREAD_COLOR);
+    cv::Mat img = cv::imread(imagePath, cv::IMREAD_COLOR);
 
     // Get input and output names
     Ort::AllocatorWithDefaultOptions allocator;
-    const char* input_name = session.GetInputName(0, allocator);
-    const char* output_name = session.GetOutputName(0, allocator);
+    const char* input_name = session->GetInputName(0, allocator);
+    const char* output_name = session->GetOutputName(0, allocator);
     // Get input tensor shape
-    Ort::TypeInfo input_type_info = session.GetInputTypeInfo(0);
-    auto input_tensor_info = input_type_info.GetTensorTypeAndShapeInfo();
+    Ort::TypeInfo input_type_info = session->GetInputTypeInfo(0);
+    auto input_tensor_info = input_type_info->GetTensorTypeAndShapeInfo();
     std::vector<int64_t> input_dims = input_tensor_info.GetShape();
     // Get input tensor dims
     const int input_width = input_dims[2];
@@ -76,7 +76,7 @@ std::string NativeClassifyImageModule::runInference(jsi::Runtime& rt, std::strin
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), input_tensor_values.size(), input_shape.data(), input_shape.size());
     // Run inference
-    auto output_tensors = session.Run(Ort::RunOptions{nullptr}, &input_name, &input_tensor, 1, &output_name, 1);
+    auto output_tensors = session->Run(Ort::RunOptions{nullptr}, &input_name, &input_tensor, 1, &output_name, 1);
 
     // Process the output
     float* output_data = output_tensors.front().GetTensorMutableData<float>();
