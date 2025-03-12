@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 # Define the library name here.
-project(cvappmodules)
+project(appmodules)
 
 set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../libs/)
 

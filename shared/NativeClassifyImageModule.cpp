@@ -53,7 +53,7 @@ std::string NativeClassifyImageModule::runInference(jsi::Runtime& rt, std::strin
     const char* output_name = session->GetOutputName(0, allocator);
     // Get input tensor shape
     Ort::TypeInfo input_type_info = session->GetInputTypeInfo(0);
-    auto input_tensor_info = input_type_info->GetTensorTypeAndShapeInfo();
+    auto input_tensor_info = input_type_info.GetTensorTypeAndShapeInfo();
     std::vector<int64_t> input_dims = input_tensor_info.GetShape();
     // Get input tensor dims
     const int input_width = input_dims[2];
